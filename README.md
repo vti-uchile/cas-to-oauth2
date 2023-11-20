@@ -21,7 +21,7 @@
 
 ```bash
 git clone https://github.com/vti-uchile/cas-to-oauth2.git
-cd project
+cd cas-to-oauth2
 ```
 
 2. Install dependencies:
