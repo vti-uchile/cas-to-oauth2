@@ -63,4 +63,15 @@ const (
 	// Database Collections
 	DB_COLLECTION_SERVICE_TICKETS = "serviceTickets"
 	DB_COLLECTION_TGT             = "ticketGrantingTickets"
+
+	// SAML Validate
+	SAML_TARGET_PARAM           = "TARGET"
+	SAML_ERRMSG_INVALID_REQUEST = "Invalid SAML Request"
+	SAML_ERRMSG_VALIDATION      = "Error in validation process"
+	SAML_ERRMSG_INVALID_TICKET  = "Invalid SAML Ticket or Service"
+	SAML_ISSUER                 = "cas-to-oauth2"
+	SAML_STATUSCODE_SUCCESS     = "saml1p:Success"
+	SAML_STATUSCODE_ERROR       = "saml1p:RequestDenied"
+	XML_SOAP_NAMESPACE          = "http://schemas.xmlsoap.org/soap/envelope/"
+	XML_SAML_NAMESPACE          = "urn:oasis:names:tc:SAML:1.0"
 )

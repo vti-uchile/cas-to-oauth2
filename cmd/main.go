@@ -41,6 +41,7 @@ func main() {
 	r.POST("/login", handlers.Login)
 	r.GET("/oauth2/callback", handlers.OAuth2Callback)
 	r.GET("/serviceValidate", handlers.ServiceValidate)
+	r.POST("/samlValidate", handlers.SamlValidate)
 	r.GET("/validate", handlers.Validate)
 	r.GET("/proxy", handlers.Proxy)
 	r.GET("/logout", handlers.Logout)

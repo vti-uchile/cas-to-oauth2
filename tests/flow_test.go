@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"cas-to-oauth2/config"
 	"cas-to-oauth2/database"
 	"cas-to-oauth2/internal/handlers"
+	"cas-to-oauth2/internal/utils"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -52,6 +54,7 @@ func setupTestRouter() *gin.Engine {
 	r.POST("/login", handlers.Login)
 	r.GET("/oauth2/callback", handlers.OAuth2Callback)
 	r.GET("/serviceValidate", handlers.ServiceValidate)
+	r.POST("/samlValidate", handlers.SamlValidate)
 	r.GET("/validate", handlers.Validate)
 	r.GET("/logout", handlers.Logout)
 	r.POST("/logout", handlers.Logout)
@@ -66,39 +69,23 @@ func setupTestRouter() *gin.Engine {
 	return r
 }
 
-func TestFlowHandler(t *testing.T) {
+func TestStartServer(t *testing.T) {
 	setupTestRouter()
+}
 
+func TestFlowHandler(t *testing.T) {
 	var st string
-	var err error
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: jar,
 	}
 
 	t.Run("GetTicketGrantingTicket", func(t *testing.T) {
-		err := getCookie(client, originURL+"/login")
-		if err != nil {
-			t.Fatalf("Error obtaining the OAuth2 cookie: %s", err)
-		}
-
-		u, _ := url.Parse(originURL)
-		cookies := client.Jar.Cookies(u)
-		if len(cookies) == 0 {
-			t.Error("Cookies were expected to be set, but none were found")
-		}
-		t.Logf("Cookies: %v", cookies)
+		getTicketGrantingTicket(t, client, originURL)
 	})
 
 	t.Run("GetServiceTicket", func(t *testing.T) {
-		st, err = getServiceTicket(client, originURL+"/login")
-		if err != nil {
-			t.Fatalf("Error getting the service ticket: %s", err)
-		}
-		if st == "" {
-			t.Error("Expected a non-empty service ticket")
-		}
-		t.Logf("Service ticket: %s", st)
+		st = getServiceTicketTest(t, client, originURL+"/login")
 	})
 
 	t.Run("ValidateServiceTicket", func(t *testing.T) {
@@ -110,12 +97,71 @@ func TestFlowHandler(t *testing.T) {
 	})
 
 	t.Run("Logout", func(t *testing.T) {
-		res, err := logout(client, originURL+"/logout")
-		if err != nil {
-			t.Fatalf("Error during logout: %s", err)
-		}
-		t.Logf("Logout Response: %s", res)
+		logoutTest(t, client, originURL+"/logout")
 	})
+}
+
+func TestFlowSAMLHandler(t *testing.T) {
+	var st string
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+
+	t.Run("GetTicketGrantingTicket", func(t *testing.T) {
+		getTicketGrantingTicket(t, client, originURL)
+	})
+
+	t.Run("GetServiceTicket", func(t *testing.T) {
+		st = getServiceTicketTest(t, client, originURL+"/login")
+	})
+
+	t.Run("ValidateSAMLTicket", func(t *testing.T) {
+		res, err := validateSAML(client, originURL+"/samlValidate", st)
+		if err != nil {
+			t.Fatalf("Error validating the service ticket: %s", err)
+		}
+		t.Logf("Validate SAML Response: %s", res)
+	})
+
+	t.Run("Logout", func(t *testing.T) {
+		logoutTest(t, client, originURL+"/logout")
+	})
+}
+
+func getTicketGrantingTicket(t *testing.T, client *http.Client, originURL string) {
+	err := getCookie(client, originURL+"/login")
+	if err != nil {
+		t.Fatalf("Error obtaining the OAuth2 cookie: %s", err)
+	}
+
+	u, _ := url.Parse(originURL)
+	cookies := client.Jar.Cookies(u)
+	if len(cookies) == 0 {
+		t.Error("Cookies were expected to be set, but none were found")
+	}
+	t.Logf("Cookies: %v", cookies)
+}
+
+func getServiceTicketTest(t *testing.T, client *http.Client, loginURL string) string {
+	st, err := getServiceTicket(client, loginURL)
+	if err != nil {
+		t.Fatalf("Error getting the service ticket: %s", err)
+	}
+	if st == "" {
+		t.Error("Expected a non-empty service ticket")
+	}
+	t.Logf("Service ticket: %s", st)
+
+	return st
+}
+
+func logoutTest(t *testing.T, client *http.Client, logoutURL string) {
+	res, err := logout(client, logoutURL)
+	if err != nil {
+		t.Fatalf("Error during logout: %s", err)
+	}
+	t.Logf("Logout Response: %s", res)
 }
 
 func getCookie(client *http.Client, urlStr string) error {
@@ -217,6 +263,41 @@ func validateST(client *http.Client, validateURL, serviceTicket string) (string,
 	return body, nil
 }
 
+func validateSAML(client *http.Client, validateURL, serviceTicket string) (string, error) {
+	timeNow := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+	randomID := utils.RandomString(43)
+
+	xmlData := fmt.Sprintf(`<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+	<Header/>
+	<Body>
+		<samlp:Request xmlns:samlp="urn:oasis:names:tc:SAML:1.0:protocol" MajorVersion="1" MinorVersion="1" RequestID="_%s" IssueInstant="%s">
+			<samlp:AssertionArtifact>%s</samlp:AssertionArtifact>
+		</samlp:Request>
+	</Body>
+	</Envelope>`, randomID, timeNow, serviceTicket)
+
+	req, err := http.NewRequest("POST", validateURL, bytes.NewBufferString(xmlData))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "text/xml")
+	q := req.URL.Query()
+	q.Add("TARGET", serviceURL)
+	req.URL.RawQuery = q.Encode()
+
+	body, resp, err := readAndCloseBody(client, req, true)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("a 200 status code was expected, but %d was received", resp.StatusCode)
+	}
+
+	return body, nil
+}
+
 func logout(client *http.Client, logoutURL string) (string, error) {
 	req, err := http.NewRequest("GET", logoutURL, nil)
 	if err != nil {
@@ -242,7 +323,7 @@ func readAndCloseBody(client *http.Client, req *http.Request, retBody bool) (str
 		return "", resp, nil
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", nil, err
 	}
