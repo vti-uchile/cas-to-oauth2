@@ -40,6 +40,7 @@ func Logout(c *gin.Context) {
 	}
 
 	unsetCookie(c, config.AppConfig.TGTName, config.AppConfig.Domain)
+	unsetCookie(c, config.AppConfig.JSessionID, config.AppConfig.Domain)
 
 	if config.AppConfig.AnotherCookie != "" {
 		unsetCookie(c, config.AppConfig.AnotherCookie, config.AppConfig.Domain)

@@ -22,9 +22,10 @@ type Config struct {
 	DBPoolSize     int
 	TGTName        string
 	TGTDuration    int
-	AnotherCookie  string
 	Domain         string
 	AllowedDomains []string
+	AnotherCookie  string
+	JSessionID     string
 	UseAPM         bool
 }
 
@@ -51,9 +52,10 @@ func LoadConfig() {
 	AppConfig.DBPoolSize, _ = strconv.Atoi(viper.GetString("DB_POOL_SIZE"))
 	AppConfig.TGTName = viper.GetString("TGT_NAME")
 	AppConfig.TGTDuration, _ = strconv.Atoi(viper.GetString("TGT_DURATION"))
-	AppConfig.AnotherCookie = viper.GetString("ANOTHER_COOKIE")
 	AppConfig.Domain = viper.GetString("DOMAIN_SCOPE")
 	AppConfig.AllowedDomains = strings.Split(rawDomains, ",")
+	AppConfig.AnotherCookie = viper.GetString("ANOTHER_COOKIE")
+	AppConfig.JSessionID = viper.GetString("JSESSION_ID")
 	AppConfig.UseAPM, _ = strconv.ParseBool(viper.GetString("USE_APM"))
 
 	if AppConfig.AuthMethod == constants.OAUTH_METHOD {
