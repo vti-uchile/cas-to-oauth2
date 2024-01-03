@@ -41,6 +41,10 @@ func Logout(c *gin.Context) {
 
 	unsetCookie(c, config.AppConfig.TGTName, config.AppConfig.Domain)
 
+	if config.AppConfig.AnotherCookie != "" {
+		unsetCookie(c, config.AppConfig.AnotherCookie, config.AppConfig.Domain)
+	}
+
 	if url := c.Query(constants.LOGOUT_REDIRECT_PARAM); url != "" {
 		c.Redirect(http.StatusFound, url)
 		return
