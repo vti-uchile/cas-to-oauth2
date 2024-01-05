@@ -37,6 +37,7 @@ func main() {
 		}),
 	)
 
+	r.GET("/", handlers.Login)
 	r.GET("/login", handlers.Login)
 	r.POST("/login", handlers.Login)
 	r.GET("/oauth2/callback", handlers.OAuth2Callback)
