@@ -51,5 +51,10 @@ func Logout(c *gin.Context) {
 		return
 	}
 
+	if url := c.Query(constants.COMMON_SERVICE_PARAM); url != "" {
+		c.Redirect(http.StatusFound, url)
+		return
+	}
+
 	c.HTML(http.StatusOK, constants.LOGOUT_HTML, gin.H{constants.TEMPLATE_MESSAGE: constants.LOGOUT_OK})
 }
