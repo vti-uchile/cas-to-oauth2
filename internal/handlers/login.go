@@ -30,7 +30,7 @@ func Login(c *gin.Context) {
 	utils.SetAPMLabel(span, constants.COMMON_RENEW_PARAM, renew)
 	utils.SetAPMLabel(span, constants.COMMON_GATEWAY_PARAM, gateway)
 
-	isLoggedIn, username := isLoggedIn(c, config.AppConfig.TGTName, serviceURL)
+	isLoggedIn, username := isLoggedIn(c, config.AppConfig.TGTName)
 	utils.SetAPMLabel(span, "isLoggedIn", isLoggedIn)
 
 	if utils.IsTrue(gateway) && !utils.IsTrue(renew) {
@@ -55,7 +55,7 @@ func Login(c *gin.Context) {
 	}
 }
 
-func isLoggedIn(c *gin.Context, tgtName, service string) (bool, string) {
+func isLoggedIn(c *gin.Context, tgtName string) (bool, string) {
 	tgtCookie, err := c.Cookie(tgtName)
 	if err != nil {
 		return false, ""

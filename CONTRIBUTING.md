@@ -2,7 +2,7 @@
 
 We appreciate your interest in contributing to the CAS to OAuth2 project! This document provides guidelines for contributions to the project.
 
-## How to Contribute
+## How to Contribute#
 
 ### Reporting Issues
 

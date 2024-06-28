@@ -27,6 +27,8 @@ type Config struct {
 	AnotherCookie  string
 	JSessionID     string
 	UseAPM         bool
+	TGTSecure      bool
+	TGTHttpOnly    bool
 }
 
 var (
@@ -57,6 +59,8 @@ func LoadConfig() {
 	AppConfig.AnotherCookie = viper.GetString("ANOTHER_COOKIE")
 	AppConfig.JSessionID = viper.GetString("JSESSION_ID")
 	AppConfig.UseAPM, _ = strconv.ParseBool(viper.GetString("USE_APM"))
+	AppConfig.TGTSecure, _ = strconv.ParseBool(viper.GetString("TGT_SECURE"))
+	AppConfig.TGTHttpOnly, _ = strconv.ParseBool(viper.GetString("TGT_HTTP_ONLY"))
 
 	if AppConfig.AuthMethod == constants.OAUTH_METHOD {
 		AuthProvider = initOAuth2Provider()
