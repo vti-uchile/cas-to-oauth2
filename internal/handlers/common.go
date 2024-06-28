@@ -55,9 +55,9 @@ func checkAllowedDomains(serviceURL string) bool {
 }
 
 func setCookie(c *gin.Context, tgtName, tgtValue, domain string, duration int) {
-	c.SetCookie(tgtName, tgtValue, duration, "/", domain, false, true)
+	c.SetCookie(tgtName, tgtValue, duration, "/", domain, config.AppConfig.TGTSecure, config.AppConfig.TGTHttpOnly)
 }
 
 func unsetCookie(c *gin.Context, tgtName, domain string) {
-	c.SetCookie(tgtName, "", -1, "/", domain, false, true)
+	c.SetCookie(tgtName, "", -1, "/", domain, config.AppConfig.TGTSecure, config.AppConfig.TGTHttpOnly)
 }
