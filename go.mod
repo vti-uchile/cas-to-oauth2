@@ -7,6 +7,7 @@ require (
 	github.com/alexliesenfeld/health v0.8.0
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/gorilla/securecookie v1.1.2
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.17.0
 	go.elastic.co/apm/module/apmgin/v2 v2.4.5
