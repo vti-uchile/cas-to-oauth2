@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/gorilla/securecookie"
 	"golang.org/x/oauth2"
 )
 
@@ -93,4 +94,21 @@ func DeleteTGT(tgt string) error {
 
 func IsTrue(s string) bool {
 	return s == "true"
+}
+
+func Encrypt(secureCookie *securecookie.SecureCookie, value string) (string, error) {
+	encoded, err := secureCookie.Encode(constants.SERVICE_URL_COOKIE, value)
+	if err != nil {
+		return "", err
+	}
+	return encoded, nil
+}
+
+func Decrypt(secureCookie *securecookie.SecureCookie, value string) (string, error) {
+	var decoded string
+	err := secureCookie.Decode(constants.SERVICE_URL_COOKIE, value, &decoded)
+	if err != nil {
+		return "", err
+	}
+	return decoded, nil
 }

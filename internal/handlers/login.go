@@ -49,7 +49,10 @@ func Login(c *gin.Context) {
 	}
 
 	if config.AppConfig.AuthMethod == constants.OAUTH_METHOD {
-		setCookie(c, constants.SERVICE_URL_COOKIE, serviceURL, config.AppConfig.Domain, 3600)
+		encryptedServiceURL, _ := utils.Encrypt(config.AppConfig.SecureCookie, serviceURL)
+
+		setCookie(c, constants.SERVICE_URL_COOKIE, encryptedServiceURL, config.AppConfig.Domain, 3600)
+
 		config.AuthProvider.RedirectAuth(c)
 		return
 	}
