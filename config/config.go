@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/securecookie"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
@@ -29,6 +30,7 @@ type Config struct {
 	UseAPM         bool
 	TGTSecure      bool
 	TGTHttpOnly    bool
+	SecureCookie   *securecookie.SecureCookie
 }
 
 var (
@@ -61,6 +63,11 @@ func LoadConfig() {
 	AppConfig.UseAPM, _ = strconv.ParseBool(viper.GetString("USE_APM"))
 	AppConfig.TGTSecure, _ = strconv.ParseBool(viper.GetString("TGT_SECURE"))
 	AppConfig.TGTHttpOnly, _ = strconv.ParseBool(viper.GetString("TGT_HTTP_ONLY"))
+
+	// SecureCookie is used to encrypt and decrypt the service URL
+	hashKey := []byte(viper.GetString("SC_HASH_KEY"))
+	blockKey := []byte(viper.GetString("SC_BLOCK_KEY"))
+	AppConfig.SecureCookie = securecookie.New(hashKey, blockKey)
 
 	if AppConfig.AuthMethod == constants.OAUTH_METHOD {
 		AuthProvider = initOAuth2Provider()

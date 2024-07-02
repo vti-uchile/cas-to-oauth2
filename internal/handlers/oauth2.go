@@ -52,9 +52,10 @@ func OAuth2Callback(c *gin.Context) {
 	tgt := utils.GenerateTGT(config.AppConfig.TGTDuration, sub)
 	setCookie(c, config.AppConfig.TGTName, tgt, config.AppConfig.Domain, config.AppConfig.TGTDuration)
 
-	serviceURL, err := c.Cookie(constants.SERVICE_URL_COOKIE)
+	encryptedServiceURL, err := c.Cookie(constants.SERVICE_URL_COOKIE)
 	unsetCookie(c, constants.SERVICE_URL_COOKIE, config.AppConfig.Domain)
 
+	serviceURL, _ := utils.Decrypt(config.AppConfig.SecureCookie, encryptedServiceURL)
 	if serviceURL != "" {
 		redirectToService(c, serviceURL, sub, tgt, true)
 		return
