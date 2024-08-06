@@ -4,7 +4,7 @@ import (
 	"cas-to-oauth2/config"
 	"cas-to-oauth2/constants"
 	"cas-to-oauth2/internal/utils"
-	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,8 +34,20 @@ func redirectToService(c *gin.Context, serviceURL, username, tgt string, isDirec
 	}
 
 	serviceTicket := utils.GenerateServiceTicket(serviceURL, username, tgt, isDirect)
-	redirectURL := fmt.Sprintf("%s?ticket=%s", serviceURL, serviceTicket)
-	c.Redirect(http.StatusFound, redirectURL)
+
+	parsedServiceURL, err := url.Parse(serviceURL)
+	if err != nil {
+		c.HTML(http.StatusBadRequest, constants.ERROR_HTML, gin.H{constants.TEMPLATE_MESSAGE: "Invalid service URL"})
+		return
+	}
+
+	query := parsedServiceURL.Query()
+	query.Set("ticket", serviceTicket)
+	parsedServiceURL.RawQuery = query.Encode()
+
+	log.Println("Redirecting to service:", parsedServiceURL.String())
+
+	c.Redirect(http.StatusFound, parsedServiceURL.String())
 }
 
 func checkAllowedDomains(serviceURL string) bool {
