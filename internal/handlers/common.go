@@ -37,12 +37,12 @@ func redirectToService(c *gin.Context, serviceURL, username, tgt string, isDirec
 
 	parsedServiceURL, err := url.Parse(serviceURL)
 	if err != nil {
-		c.HTML(http.StatusBadRequest, constants.ERROR_HTML, gin.H{constants.TEMPLATE_MESSAGE: "Invalid service URL"})
+		c.HTML(http.StatusBadRequest, constants.ERROR_HTML, gin.H{constants.TEMPLATE_MESSAGE: constants.COMMON_ERRMSG_URL_PARSE})
 		return
 	}
 
 	query := parsedServiceURL.Query()
-	query.Set("ticket", serviceTicket)
+	query.Set(constants.VALIDATE_TICKET_PARAM, serviceTicket)
 	parsedServiceURL.RawQuery = query.Encode()
 
 	log.Println("Redirecting to service:", parsedServiceURL.String())
@@ -72,4 +72,9 @@ func setCookie(c *gin.Context, tgtName, tgtValue, domain string, duration int) {
 
 func unsetCookie(c *gin.Context, tgtName, domain string) {
 	c.SetCookie(tgtName, "", -1, "/", domain, config.AppConfig.TGTSecure, config.AppConfig.TGTHttpOnly)
+}
+
+func Head(c *gin.Context) {
+	c.Status(http.StatusOK)
+	return
 }

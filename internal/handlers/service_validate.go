@@ -28,13 +28,13 @@ func ServiceValidate(c *gin.Context) {
 	isValid, username, _, isOk := commonValidation(c)
 	if !isOk {
 		response.Failure = &AuthenticationFailure{Code: constants.VALIDATE_INVALID_REQUEST, Description: constants.VALIDATE_ERRMSG_INVALID_REQUEST}
-		xmlResponse(c, http.StatusUnauthorized, response, formatted)
+		xmlResponse(c, http.StatusOK, response, formatted)
 		return
 	}
 
 	if !isValid {
 		response.Failure = &AuthenticationFailure{Code: constants.VALIDATE_INVALID_TICKET, Description: constants.VALIDATE_ERRMSG_INVALID_TICKET}
-		xmlResponse(c, http.StatusUnauthorized, response, formatted)
+		xmlResponse(c, http.StatusOK, response, formatted)
 		return
 	}
 
@@ -55,12 +55,12 @@ func ServiceValidate(c *gin.Context) {
 func Validate(c *gin.Context) {
 	isValid, username, _, isOk := commonValidation(c)
 	if !isOk {
-		c.String(http.StatusBadRequest, "no\n")
+		c.String(http.StatusOK, "no\n")
 		return
 	}
 
 	if !isValid {
-		c.String(http.StatusUnauthorized, "no\n")
+		c.String(http.StatusOK, "no\n")
 		return
 	}
 
