@@ -45,7 +45,7 @@ func main() {
 	r.GET(constants.ENDPOINT_PROXY_VALIDATE, handlers.ServiceValidate)
 	r.POST(constants.ENDPOINT_SAML_VALIDATE, handlers.SamlValidate)
 	r.GET(constants.ENDPOINT_VALIDATE, handlers.Validate)
-	r.GET(constants.ENDPOINT_LOGOUT, handlers.Proxy)
+	r.GET(constants.ENDPOINT_PROXY, handlers.Proxy)
 	r.GET(constants.ENDPOINT_LOGOUT, handlers.Logout)
 	r.POST(constants.ENDPOINT_LOGOUT, handlers.Logout)
 	r.GET(constants.ENDPOINT_HEALTHCHECK, gin.WrapF(health.NewHandler(checker)))

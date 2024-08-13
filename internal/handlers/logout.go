@@ -56,6 +56,6 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	loginURL := c.Request.URL.Scheme + "://" + c.Request.URL.Host + constants.ENDPOINT_LOGIN
+	loginURL := "//" + c.Request.Host + constants.ENDPOINT_LOGIN
 	c.Redirect(http.StatusFound, loginURL)
 }
