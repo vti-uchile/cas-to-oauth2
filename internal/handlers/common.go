@@ -4,7 +4,6 @@ import (
 	"cas-to-oauth2/config"
 	"cas-to-oauth2/constants"
 	"cas-to-oauth2/internal/utils"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,8 +43,6 @@ func redirectToService(c *gin.Context, serviceURL, username, tgt string, isDirec
 	query := parsedServiceURL.Query()
 	query.Set(constants.VALIDATE_TICKET_PARAM, serviceTicket)
 	parsedServiceURL.RawQuery = query.Encode()
-
-	log.Println("Redirecting to service:", parsedServiceURL.String())
 
 	c.Redirect(http.StatusFound, parsedServiceURL.String())
 }
