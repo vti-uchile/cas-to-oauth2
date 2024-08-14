@@ -56,5 +56,5 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, constants.LOGOUT_HTML, gin.H{constants.TEMPLATE_MESSAGE: constants.LOGOUT_OK})
+	c.Redirect(http.StatusFound, constants.ENDPOINT_LOGIN)
 }
