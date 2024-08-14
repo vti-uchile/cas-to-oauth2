@@ -1,6 +1,18 @@
 package constants
 
 const (
+	// Endpoints
+	ENDPOINT_ROOT             = "/"
+	ENDPOINT_LOGIN            = "/login"
+	ENDPOINT_OAUTH2           = "/oauth2/callback"
+	ENDPOINT_SERVICE_VALIDATE = "/serviceValidate"
+	ENDPOINT_PROXY_VALIDATE   = "/proxyValidate"
+	ENDPOINT_SAML_VALIDATE    = "/samlValidate"
+	ENDPOINT_VALIDATE         = "/validate"
+	ENDPOINT_PROXY            = "/proxy"
+	ENDPOINT_LOGOUT           = "/logout"
+	ENDPOINT_HEALTHCHECK      = "/healthcheck"
+
 	// Template variables
 	TEMPLATE_MESSAGE = "message"
 
