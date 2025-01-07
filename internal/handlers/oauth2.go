@@ -6,6 +6,7 @@ import (
 	"cas-to-oauth2/internal/utils"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -59,7 +60,6 @@ func OAuth2Callback(c *gin.Context) {
 
 	serviceURL, _ := utils.Decrypt(config.AppConfig.SecureCookie, encryptedServiceURL)
 	if serviceURL != "" {
-
 		action := getAction(serviceURL)
 		if action != nil {
 			action(c)
@@ -78,7 +78,7 @@ type Rule struct {
 	Params     map[string]string
 }
 
-var rules = loadRules()
+var rules []Rule
 
 func loadRules() []Rule {
 	ruleStrings := strings.Split(config.AppConfig.Rules, "|")
@@ -102,10 +102,20 @@ func loadRules() []Rule {
 }
 
 func getAction(serviceURL string) func(c *gin.Context) {
+	rules = loadRules()
+
+	parsedURL, err := url.Parse(serviceURL)
+	if err != nil {
+		log.Printf("Invalid serviceURL: %s, error: %v", serviceURL, err)
+		return nil
+	}
+	domain := parsedURL.Hostname()
+	log.Printf("Extracted domain: %s", domain)
+
 	for _, rule := range rules {
-		log.Printf("Checking rule for serviceURL: %s", serviceURL)
 		log.Printf("Rule: %+v", rule)
-		if serviceURL == rule.ServiceURL {
+		if domain == rule.ServiceURL {
+			log.Printf("Matched rule: %+v", rule)
 			actionFunc := getActionFromEnv(rule.Action, rule.Params)
 			if actionFunc != nil {
 				return actionFunc
