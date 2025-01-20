@@ -31,6 +31,7 @@ type Config struct {
 	TGTSecure      bool
 	TGTHttpOnly    bool
 	SecureCookie   *securecookie.SecureCookie
+	Rules          string
 }
 
 var (
@@ -63,6 +64,7 @@ func LoadConfig() {
 	AppConfig.UseAPM, _ = strconv.ParseBool(viper.GetString("USE_APM"))
 	AppConfig.TGTSecure, _ = strconv.ParseBool(viper.GetString("TGT_SECURE"))
 	AppConfig.TGTHttpOnly, _ = strconv.ParseBool(viper.GetString("TGT_HTTP_ONLY"))
+	AppConfig.Rules = viper.GetString("RULES")
 
 	// SecureCookie is used to encrypt and decrypt the service URL
 	hashKey := []byte(viper.GetString("SC_HASH_KEY"))
