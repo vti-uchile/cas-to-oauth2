@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"path"
 	"time"
 
 	"cas-to-oauth2/config"
@@ -17,7 +18,13 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.RedirectFixedPath = true
+	r.Use(func(c *gin.Context) {
+		cleaned := path.Clean(c.Request.URL.Path)
+		if cleaned != c.Request.URL.Path {
+			c.Request.URL.Path = cleaned
+		}
+		c.Next()
+	})
 	r.Use(apmgin.Middleware(r))
 
 	r.LoadHTMLGlob("web/templates/*")
