@@ -17,6 +17,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.RedirectFixedPath = true
 	r.Use(apmgin.Middleware(r))
 
 	r.LoadHTMLGlob("web/templates/*")
