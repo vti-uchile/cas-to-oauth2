@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"path"
+	"strings"
 	"time"
 
 	"cas-to-oauth2/config"
@@ -18,13 +20,6 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.Use(func(c *gin.Context) {
-		cleaned := path.Clean(c.Request.URL.Path)
-		if cleaned != c.Request.URL.Path {
-			c.Request.URL.Path = cleaned
-		}
-		c.Next()
-	})
 	r.Use(apmgin.Middleware(r))
 
 	r.LoadHTMLGlob("web/templates/*")
@@ -58,7 +53,13 @@ func main() {
 	r.POST(constants.ENDPOINT_LOGOUT, handlers.Logout)
 	r.GET(constants.ENDPOINT_HEALTHCHECK, gin.WrapF(health.NewHandler(checker)))
 
-	if err := r.Run(":8080"); err != nil {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if strings.Contains(req.URL.Path, "//") {
+			req.URL.Path = path.Clean(req.URL.Path)
+		}
+		r.ServeHTTP(w, req)
+	})
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(constants.MAIN_ERRMSG, err)
 	}
 }
