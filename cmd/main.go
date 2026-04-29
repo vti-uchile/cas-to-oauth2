@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"path"
+	"strings"
 	"time"
 
 	"cas-to-oauth2/config"
@@ -50,7 +53,13 @@ func main() {
 	r.POST(constants.ENDPOINT_LOGOUT, handlers.Logout)
 	r.GET(constants.ENDPOINT_HEALTHCHECK, gin.WrapF(health.NewHandler(checker)))
 
-	if err := r.Run(":8080"); err != nil {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if strings.Contains(req.URL.Path, "//") {
+			req.URL.Path = path.Clean(req.URL.Path)
+		}
+		r.ServeHTTP(w, req)
+	})
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(constants.MAIN_ERRMSG, err)
 	}
 }
